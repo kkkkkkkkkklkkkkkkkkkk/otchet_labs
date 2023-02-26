@@ -126,19 +126,19 @@ start:
                jne .finish       ; если ни одна кнопка не нажата, то выйти из процедуры,
                ; Кнопка А
                .btn1:
-                  invoke MessageBox,[hwnd],_textb,_title_window,0  ;  показать MessageBox.
+                  invoke MessageBox,[hwnd],_textb,_title_window,0  ; показать MessageBox.
                   jmp .finish
                ; Кнопка B
                .btn2:
-                  invoke MessageBox,[hwnd],_textb2,_title_window,0  ;  показать MessageBox.
+                  invoke MessageBox,[hwnd],_textb2,_title_window,0  ; показать MessageBox.
                   jmp .finish
                ; Кнопка C
                .btn3:
-                  invoke MessageBox,[hwnd],_textb3,_title_window,0  ;  показать MessageBox
+                  invoke MessageBox,[hwnd],_textb3,_title_window,0  ; показать MessageBox
                   jmp .finish
                ; Кнопка D
                .btn4:
-                  invoke MessageBox,[hwnd],_textb4,_title_window,0  ;  показать MessageBox
+                  invoke MessageBox,[hwnd],_textb4,_title_window,0  ; показать MessageBox
                   jmp .finish
                .wmdestroy:
                   invoke PostQuitMessage,0
@@ -161,10 +161,13 @@ section '.idata' import data readable writeable
 section '.rsrc' resource data readable
     IDI_MAIN=10
 
-    directory RT_ICON,icons,\
-              RT_GROUP_ICON,group_icons
-    resource group_icons,\
-             IDI_MAIN,LANG_NEUTRAL,main_icon
-    resource icons,\
+    directory RT_ICON,icons,\                    ; Выделяем иконке два типа ресурсов:
+              RT_GROUP_ICON,group_icons          ; RT_ICON - тип отдельной иконки, RT_GROUP_ICON - тип ресурса,
+                                                 ; связанного с одним или несколькими ресурсами типа RT_ICON.
+    resource group_icons,\                    
+             IDI_MAIN,LANG_NEUTRAL,main_icon     ; Группа иконок.
+             
+    resource icons,\                             ; Отдельная иконка.
              1,LANG_NEUTRAL,main_icon_data
-    icon main_icon,main_icon_data,'icon.ico'
+    icon main_icon,main_icon_data,'icon.ico'     ; Задаем только одну пару параметров,
+                                                 ; поскольку группа содержит единственную иконку.
