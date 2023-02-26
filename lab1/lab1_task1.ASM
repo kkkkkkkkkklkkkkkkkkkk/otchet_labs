@@ -1,6 +1,6 @@
-format PE GUI 4.0                ; Ôîðìàò PE. Âåðñèÿ GUI 4.0
-entry start                      ; Òî÷êà âõîäà.
-include 'C:\Users\GamerPC\Downloads\fasmw17330\INCLUDE\win32ax.inc' ; Ñòàíäàðòíîå âêëþ÷åíèå.
+format PE GUI 4.0                ; Формат PE. Версия GUI 4.0
+entry start                      ; Точка входа.
+include 'INCLUDE\win32ax.inc' ; Стандартное включение
 
 ;========= Секция данных =====================================================================
 
@@ -20,5 +20,5 @@ start:
 section '.idata' import data readable writeable
     library kernel32,'KERNEL32.DLL',\
             user32,'USER32.DLL'
-    include 'C:\Users\GamerPC\Downloads\fasmw17330\INCLUDE\API\kernel32.inc'
-    include 'C:\Users\GamerPC\Downloads\fasmw17330\INCLUDE\API\user32.inc'
+    include 'INCLUDE\API\kernel32.inc'
+    include 'INCLUDE\API\user32.inc'
