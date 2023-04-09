@@ -7,6 +7,7 @@ entry start
 section '.data?' data readable writeable
  x dd 5 dup(?)                        ; Объявление массива с 5-ю элементами, которые могут содержать любое значение
  size_x = $-x                         ; Вычисляем размер массива x
+ A dw ?
 
 
 section '.data' data readable
