@@ -11,12 +11,6 @@ section '.data?' data readable writeable
    x3 rd 256           ; Объявление переменной x3
    len_x dd ?          ; Объявление неинициализированной переменной len_x
 
-;============== Сегмент CRC8  ===============================================================================
-section '.CRC8' data readable writeable
-
-        msg_hex db 'hex = %Xh ', 0Dh, 0Ah,0     ; Объявление строки для вывода значения в 16-ой форме.
-
-
 ;============== Сегмент вывода ==============================================================================
 section '.msg' data readable
 
@@ -76,52 +70,51 @@ start:
 
      cinvoke printf,msg_s, 'CRC8',0             ; Выводит на экран сообщение 'CRC8'.
      stdcall CRC8, x1,len_x                     ; Вызывает процедуру CRC8Calc для вычисления CRC8 для строки
-     cinvoke printf,msg_hex, eax,0
 
      invoke  sleep, 5000                        ; Зарежка 5 секунд
 
      invoke  exit, 0                            ; Завершение и выход из программы.
      ret
 
-proc    CRC8 lpData:DWORD, dSize:DWORD
-        push    ebx ecx edx esi edi
- 
-        CRC8_POLYNOM = 31h
+proc CRC8 lpData:DWORD, dSize:DWORD             ; Объявление процедуры CRC8 с двумя параметрами: указателем на
+                                                ;  на данные и размером данных.
+     push    ebx ecx edx esi edi                ; Сохранение значимых регистров в стеке для последующего
+                                                ;  восстановления.
+     CRC8_POLYNOM = 31h                         ; Определение полинома CRC8 как 31h
+     mov  al,0FFh                               ; Инициализация регистра al значением 0xFF
+     cmp  [dSize],0                             ; Проверка размера данных на ноль. Если размер == 0, то
+                                                ;  процедура сразу же завершается
+     je .loc_ret
 
-        mov     al,0FFh
+     xor  ecx,ecx                               ; Инициализация счетчика цикла ecx значением ноль.
+     @@:                                        ; Метка начала цикла.
+        mov     ebx,[lpData]                    ; Получение очередного байта данных по указателю IpData и
+                                                ;  сохранение его в ebx
+        xor     al,byte [ebx+ecx]               ; Комбинирование текущего значения регистра al с байтом данных
+        xor   esi,esi                           ; Обнуление счетчика
 
-        cmp     [dSize],0
-        je      .loc_ret
+        .loc_cycle:                             ; Цикл loc_cycle
+           test  al,80h                         ; Проверка старшего бита регистра al на равенство единице.
+           jz .loc_1                            ; В случае неравенства, сдвигаем регистр al на один бит влево
+           shl     al,1
+           xor     al,CRC8_POLYNOM              ; В случае равенства, сдвигаем регистр al на один бит влево
+                                                ;  и комбинируем его с полиномом.
+           jmp     .loc_next                    ; Переходим к метке loc_next
 
-        xor     ecx,ecx
-@@:
-        mov     ebx,[lpData]
-        xor     al,byte [ebx+ecx]
- 
-        xor     esi,esi
-.loc_cycle:
-        test    al,80h
-        jz      .loc_1
- 
-        shl     al,1
-        xor     al,CRC8_POLYNOM
-        jmp     .loc_next
-.loc_1:
-        shl     al,1
-.loc_next:
-        inc     esi
-        cmp     esi,8
-        jb      .loc_cycle
-
-        inc     ecx
-        cmp     ecx,[dSize]
-        jb      @b
- 
-.loc_ret:
-        and     eax,0FFh
- 
-        pop     edi esi edx ecx ebx
-        ret
+       .loc_1:                                  ; Метка loc_1
+           shl     al,1                         ; Сдвиг регистра al на один бит влево.
+       .loc_next:                               ; Метка loc_next
+           inc     esi                          ; Увеличение счетчика цикла esi на единицу
+           cmp     esi,8                        ; Сравниваем значение esi с значением 8
+           jb      .loc_cycle                   ; В случае неравенства переходим на метку loc_cycle
+           inc     ecx                          ; Увеличиваем счетчик на единицу
+           cmp     ecx,[dSize]                  ; Сравниваем значение счетчика цикла с размером данных,
+                                                ;  в случае неравенства переходим на метку @@
+           jb      @b
+       .loc_ret:                                ; Метка loc_ret
+           and     eax,0FFh                     ; Обнуление всех битов, кроме младших 8, в регистре eax
+           pop     edi esi edx ecx ebx          ; Восстановление значимых регистров из стека
+           ret                                  ; Выход из процедуры.
 endp
 
 ;============== Таблица импорта ==============================================================================
